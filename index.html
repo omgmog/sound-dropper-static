@@ -29,6 +29,7 @@
             flex-direction: column;
             max-width: 100%;
         }
+        .button,
         button {
             font-size: 1.5rem;
             margin: 1rem;
@@ -41,7 +42,12 @@
             transform: none;
             transition: .2s;
             text-transform: uppercase;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-decoration: none;
         }
+        .button:hover,
         button:hover {
             transform: translateY(-.125rem);
             box-shadow: 0 .125rem 0 rgba(0,0,0,.2);
@@ -93,9 +99,11 @@
             flex: 1;
             flex-basis: auto;
         }
+        #recordings .button,
         #recordings button {
-            font-size: 1rem;
-            margin: 0;
+            font-size: 1.2rem;
+            margin: 0 0 0 .5rem;
+            padding: 0 .5rem;
         }
     </style>
 </head>
@@ -171,8 +179,6 @@
                 changeInput('default');
             });
 
-
-
             $('#devices').style.display = 'block';
             $('#record').disabled = false;
         }
@@ -214,7 +220,7 @@
             recorder.stop();
 
             recorder.onstop =  (e) => {
-                const blob = new Blob(chunks, {tyoe: 'audio/ogg; codecs=opus'});
+                const blob = new Blob(chunks, {type: 'audio/ogg; codecs=opus'});
                 const audioURL = window.URL.createObjectURL(blob);
 
                 createRecordingPlayer(audioURL);
@@ -238,6 +244,13 @@
             audioEl.src = url;
             audioEl.setAttribute('controls','');
 
+            const downloadBtn = document.createElement('a');
+            downloadBtn.className = 'button';
+            downloadBtn.innerHTML = '💾';
+            downloadBtn.href = url;
+            downloadBtn.title = 'Download this recording';
+            downloadBtn.setAttribute('download','');
+
             const deleteBtn = document.createElement('button');
             deleteBtn.innerHTML = '🗑️';
             deleteBtn.title = 'Delete this recording';
@@ -249,6 +262,7 @@
 
             liEl.appendChild(title);
             liEl.appendChild(audioEl);
+            liEl.appendChild(downloadBtn);
             liEl.appendChild(deleteBtn);
 
             $('#recordings').appendChild(liEl);
