@@ -160,15 +160,18 @@
         }
 
         const connect = async () => {
-            devices = (await navigator.mediaDevices.enumerateDevices()).filter(device=>device.kind==='audioinput');
-            changeInput('default');
-
-            devices.forEach(device => {
-                let device_option = document.createElement('option');
-                device_option.value = device.deviceId;
-                device_option.appendChild(document.createTextNode(device.label));
-                $('#devices').appendChild(device_option);
+            devices = await navigator.mediaDevices.enumerateDevices().then((devices)=>{
+                devices = devices.filter(device=>device.kind==='audioinput');
+                devices.forEach(device => {
+                    let device_option = document.createElement('option');
+                    device_option.value = device.deviceId || 'default';
+                    device_option.appendChild(document.createTextNode(device.label || 'Default - Microphone'));
+                    $('#devices').appendChild(device_option);
+                });
+                changeInput('default');
             });
+
+
 
             $('#devices').style.display = 'block';
             $('#record').disabled = false;
