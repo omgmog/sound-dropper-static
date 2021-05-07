@@ -309,7 +309,7 @@
             deleteBtn.title = 'Delete this recording';
             deleteBtn.addEventListener('click', (e) => {
                 if (window.confirm("Are you sure you want to delete this drop?")) {
-                deleteBtn.parentNode.remove();
+                    deleteBtn.parentNode.parentNode.remove();
                 }
             });
 
