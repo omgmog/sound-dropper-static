@@ -243,9 +243,8 @@
 
             recorder.onstop =  (e) => {
                 const blob = new Blob(chunks, {type: 'audio/ogg; codecs=opus'});
-                const audioURL = window.URL.createObjectURL(blob);
 
-                createRecordingPlayer(audioURL);
+                createRecordingPlayer(blob);
 
                 // and then save it somewhere, and clear the chunks 
                 chunks = [];
@@ -257,9 +256,10 @@
             setRecordingStatus(false);
         }
 
-        const createRecordingPlayer = (url) => {
+        const createRecordingPlayer = (blob) => {
+            const url = window.URL.createObjectURL(blob);
             const title = document.createElement('h4');
-            title.innerHTML = (new Date());
+            title.innerHTML = `${new Date()} (${blob.size} bytes)`;
             const audioEl = document.createElement('audio');
             audioEl.src = url;
             audioEl.setAttribute('controls','');
