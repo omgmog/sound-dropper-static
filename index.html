@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sound recorder</title>
+    <title>Sound Recorder</title>
     <style>
         * { box-sizing: border-box;}
         html, body {
@@ -63,7 +63,6 @@
             font-style: italic;
         }
         #devices {
-            display: none;
             font-size: 1.5rem;
         }
         #controls {
@@ -129,7 +128,7 @@
         <h1>Record something</h1>
         <canvas id="waveform" width="768" height="192"></canvas>
         <p id="status">No device selected!</p>
-        <select id="devices"></select>
+        <select id="devices" disabled></select>
         <div id="controls">
             <button id="record" disabled>Record</button>
             <button id="stop" disabled>Stop</button>
@@ -184,6 +183,16 @@
             updateStatus('Selected device:',{});
         }
 
+        const setRecordingStatus = (isRecording) => {
+            const base_title = 'Sound Recorder';
+            document.title = `${isRecording ? '🔴 RECORDING | ':''}${base_title}`;
+            $('#indicator').style.display = isRecording ? 'block' : 'none';
+
+            $('#devices').disabled = isRecording;
+            $('#record').disabled = isRecording;
+            $('#stop').disabled = !isRecording;
+        }
+
         const connect = async () => {
             devices = await navigator.mediaDevices.enumerateDevices().then((devices)=>{
                 devices = devices.filter(device=>device.kind==='audioinput');
@@ -194,10 +203,8 @@
                     $('#devices').appendChild(device_option);
                 });
                 changeInput('default');
+                setRecordingStatus(false);
             });
-
-            $('#devices').style.display = 'block';
-            $('#record').disabled = false;
         }
 
         const loopingFunction = () => {
@@ -227,10 +234,7 @@
 
             visAF = requestAnimationFrame(loopingFunction);
             
-            $('#devices').disabled = true;
-            $('#record').disabled = true;
-            $('#indicator').style.display = 'block';
-            $('#stop').disabled = false;
+            setRecordingStatus(true);
         }
 
         const stop = () => {
@@ -250,10 +254,7 @@
             cancelAnimationFrame(visAF);
             clearCanvas(canvas);
 
-            $('#devices').disabled = false;
-            $('#record').disabled = false;
-            $('#indicator').style.display = 'none';
-            $('#stop').disabled = true;
+            setRecordingStatus(false);
         }
 
         const createRecordingPlayer = (url) => {
