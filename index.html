@@ -6,6 +6,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sound Dropper</title>
     <style>
+        :root {
+            --bg: #fff;
+            --fg: #0f1031;
+
+            --bg-button: #0f1031;
+            --fg-button: #fff;
+
+            --bg-waveform: rgba(15, 16, 49, 0.027);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f1031;
+                --fg: #fff;
+                --bg-button: #fff;
+                --fg-button: #0f1031;
+
+                --bg-waveform: rgba(193, 194, 212, 0.27);
+            }
+        }
         * { box-sizing: border-box;}
         html, body {
             height: 100%;
@@ -14,7 +34,8 @@
         }
         html {
             font-size: 18px;
-            font-family: Open Sans, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif, Apple Color Emoji, Segoe UI Emoji;
+            line-height: 1.3;
         }
         body {
             display: flex;
@@ -22,24 +43,26 @@
             align-items: center;
             text-align: center;
             padding: 2rem;
+            background-color: var(--bg);
+            color: var(--fg);
         }
         main {
             margin: 0 auto auto;
             display: flex;
             flex-direction: column;
+            width: 100%;
             max-width: 100%;
             position: relative;
         }
-        .button,
-        button {
+        .button {
             font-size: 1.5rem;
             margin: 1rem;
             border: none;
-            padding: .25rem .75rem .125rem;
+            padding: .25rem 1rem .125rem;
             cursor: pointer;
-            border-radius: .25rem;
-            background: #111;
-            color: #fff;
+            border-radius: 2rem;
+            background: var(--bg-button);
+            color: var(--fg-button);
             transform: none;
             transition: .2s;
             text-transform: uppercase;
@@ -48,14 +71,12 @@
             align-items: center;
             text-decoration: none;
         }
-        .button:hover,
-        button:hover {
+        .button:hover {
             transform: translateY(-.125rem);
             box-shadow: 0 .125rem 0 rgba(0,0,0,.2);
         }
         :disabled {
             opacity: .5;
-            color: gray;
             pointer-events: none;
         }
         #status {
@@ -63,7 +84,10 @@
             font-style: italic;
         }
         #devices {
-            font-size: 1.5rem;
+            font-size: 1.2rem;
+            padding: .25rem;
+            max-width: 80%;
+            margin: auto;
         }
         #controls {
             display: flex;
@@ -73,23 +97,22 @@
             flex-wrap: wrap;
         }
         #waveform {
-            border: 1px solid black;
-            background: #fafaf7;
-            border-radius: .25rem;
             max-width: 100%;
+            background-color: var(--bg-waveform);
+            border-radius: 2rem;
         }
         #recordings {
             padding: 2rem 0;
             margin: 0;
             list-style: none;
         }
-        #recordings li {
+        #recordings div {
             display: flex;
-            flex-wrap: wrap;
             margin-bottom: 1rem;
         }
         #recordings h4 {
             flex: 1;
+            font-size: .8rem;
             flex-basis: 100%;
             margin-bottom: .5rem;
             text-align: left;
@@ -99,11 +122,10 @@
             flex: 1;
             flex-basis: auto;
         }
-        #recordings .button,
-        #recordings button {
+        #recordings .button {
             font-size: 1.2rem;
             margin: 0 0 0 .5rem;
-            padding: 0 .5rem;
+            padding: 0 1rem;
         }
         #indicator {
             position: absolute;
@@ -134,8 +156,8 @@
         <p id="status">No device selected!</p>
         <select id="devices" disabled></select>
         <div id="controls">
-            <button id="record" disabled>Drop</button>
-            <button id="stop" disabled>Stop</button>
+            <button id="record" class="button" disabled>Drop</button>
+            <button id="stop" class="button" disabled>Stop</button>
         </div>
         <ul id="recordings"></ul>
         <p class="help">
@@ -267,6 +289,9 @@
             const url = window.URL.createObjectURL(blob);
             const title = document.createElement('h4');
             title.innerHTML = `${new Date()} (${blob.size} bytes)`;
+
+            const divEl = document.createElement('div');
+
             const audioEl = document.createElement('audio');
             audioEl.src = url;
             audioEl.setAttribute('controls','');
@@ -280,6 +305,7 @@
 
             const deleteBtn = document.createElement('button');
             deleteBtn.innerHTML = '🗑️';
+            deleteBtn.className = 'button';
             deleteBtn.title = 'Delete this recording';
             deleteBtn.addEventListener('click', (e) => {
                 if (window.confirm("Are you sure you want to delete this drop?")) {
@@ -289,10 +315,12 @@
 
             const liEl = document.createElement('li');
 
+            divEl.appendChild(audioEl);
+            divEl.appendChild(downloadBtn);
+            divEl.appendChild(deleteBtn);
+
             liEl.appendChild(title);
-            liEl.appendChild(audioEl);
-            liEl.appendChild(downloadBtn);
-            liEl.appendChild(deleteBtn);
+            liEl.appendChild(divEl);
 
             $('#recordings').appendChild(liEl);
         }
