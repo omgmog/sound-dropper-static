@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sound Recorder</title>
+    <title>Sound Dropper</title>
     <style>
         * { box-sizing: border-box;}
         html, body {
@@ -129,12 +129,12 @@
 <body>
     <main>
         <div id="indicator"></div>
-        <h1>Record something</h1>
+        <h1>Drop Some Sound</h1>
         <canvas id="waveform" width="768" height="192"></canvas>
         <p id="status">No device selected!</p>
         <select id="devices" disabled></select>
         <div id="controls">
-            <button id="record" disabled>Record</button>
+            <button id="record" disabled>Drop</button>
             <button id="stop" disabled>Stop</button>
         </div>
         <ul id="recordings"></ul>
@@ -191,8 +191,8 @@
         }
 
         const setRecordingStatus = (isRecording) => {
-            const base_title = 'Sound Recorder';
-            document.title = `${isRecording ? '🔴 RECORDING | ':''}${base_title}`;
+            const base_title = 'Sound Dropper';
+            document.title = `${isRecording ? '🔴 DROPPING | ':''}${base_title}`;
             $('#indicator').style.display = isRecording ? 'block' : 'none';
 
             $('#devices').disabled = isRecording;
