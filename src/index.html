@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sound recorder</title>
+    <style>
+        * { box-sizing: border-box;}
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+        html {
+            font-size: 18px;
+            font-family: Open Sans, sans-serif;
+        }
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 2rem;
+        }
+        main {
+            margin: 0 auto auto;
+            display: flex;
+            flex-direction: column;
+            max-width: 100%;
+        }
+        button {
+            font-size: 1.5rem;
+            margin: 1rem;
+            border: none;
+            padding: .25rem .75rem .125rem;
+            cursor: pointer;
+            border-radius: .25rem;
+            background: #111;
+            color: #fff;
+            transform: none;
+            transition: .2s;
+            text-transform: uppercase;
+        }
+        button:hover {
+            transform: translateY(-.125rem);
+            box-shadow: 0 .125rem 0 rgba(0,0,0,.2);
+        }
+        :disabled {
+            opacity: .5;
+            color: gray;
+            pointer-events: none;
+        }
+        #status {
+            text-align: center;
+            font-style: italic;
+        }
+        #devices {
+            display: none;
+            font-size: 1.5rem;
+        }
+        #controls {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            max-width: 100%;
+            flex-wrap: wrap;
+        }
+        #waveform {
+            border: 1px solid black;
+            background: #fafaf7;
+            border-radius: .25rem;
+            max-width: 100%;
+        }
+        #recordings {
+            padding: 2rem 0;
+            margin: 0;
+            list-style: none;
+        }
+        #recordings li {
+            display: flex;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+        }
+        #recordings h4 {
+            flex: 1;
+            flex-basis: 100%;
+            margin-bottom: .5rem;
+            text-align: left;
+            font-weight: normal;
+        }
+        #recordings audio {
+            flex: 1;
+            flex-basis: auto;
+        }
+        #recordings button {
+            font-size: 1rem;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <h1>Record something</h1>
+        <canvas id="waveform" width="768" height="192"></canvas>
+        <p id="status">No device selected!</p>
+        <select id="devices"></select>
+        <div id="controls">
+            <button id="record" disabled>Record</button>
+            <button id="stop" disabled>Stop</button>
+        </div>
+        <ul id="recordings"></ul>
+    </main>
+
+    <script>
+        const $ = document.querySelector.bind(document);
+        const $$ = document.querySelectorAll.bind(document);
+        
+        let canvas = $('#waveform');
+        let ctx = canvas.getContext('2d');
+
+        let constraints = {audio: { deviceId: 'default'}};
+        let devices;
+        let stream;
+        let audio;
+        let target;
+        let source;
+        let analyser;
+        let recorder;
+        let chunks = [];
+        let data;
+        let visAF;
+
+        const updateStatus = (template, data) => {
+            let output = template;
+            for (let k in data) {
+                output = output.replace(new RegExp('%'+k+'%', 'g'), data[k]);
+            };
+            $('#status').innerHTML = output;
+        }
+
+        const handleError = err => {
+            updateStatus('There was a problem:<br> <span style="color:red;">%err%</span><br>Take a look in the console for more info.', {err:err});
+            console.error(err);
+        }
+
+        const changeInput = async (deviceId) => {
+            constraints.audio.deviceId = deviceId;
+            stream = await navigator.mediaDevices.getUserMedia(constraints).catch(handleError);
+            audio = new AudioContext();
+            target = audio.createGain();
+            source = audio.createMediaStreamSource(stream);
+            analyser = audio.createAnalyser();
+            analyser.fftSize = 256;
+
+            source.connect(analyser);
+            source.connect(target);
+
+            updateStatus('Selected device:',{});
+        }
+
+        const connect = async () => {
+            devices = (await navigator.mediaDevices.enumerateDevices()).filter(device=>device.kind==='audioinput');
+            changeInput('default');
+
+            devices.forEach(device => {
+                let device_option = document.createElement('option');
+                device_option.value = device.deviceId;
+                device_option.appendChild(document.createTextNode(device.label));
+                $('#devices').appendChild(device_option);
+            });
+
+            $('#devices').style.display = 'block';
+            $('#record').disabled = false;
+        }
+
+        const loopingFunction = () => {
+            analyser.getByteFrequencyData(data);
+            draw(data);
+            
+            visAF = requestAnimationFrame(loopingFunction);
+        }
+
+        const clearCanvas = (_canvas) => {
+            _canvas.getContext('2d').clearRect(0, 0, _canvas.width, _canvas.height);
+        }
+
+        const record = () => {
+            data = new Uint8Array(analyser.frequencyBinCount);
+            if (!audio) {
+                changeInput($('#devices').value);
+            }
+            audio.resume();
+
+            // recorder stuff
+            recorder = new MediaRecorder(stream);
+            recorder.start();
+            recorder.ondataavailable = (e) => {
+                chunks.push(e.data);
+            }
+
+            visAF = requestAnimationFrame(loopingFunction);
+            
+            $('#devices').disabled = true;
+            $('#record').disabled = true;
+            $('#stop').disabled = false;
+        }
+
+        const stop = () => {
+            audio.suspend();
+            recorder.stop();
+
+            recorder.onstop =  (e) => {
+                const blob = new Blob(chunks, {tyoe: 'audio/ogg; codecs=opus'});
+                const audioURL = window.URL.createObjectURL(blob);
+
+                createRecordingPlayer(audioURL);
+
+                // and then save it somewhere, and clear the chunks 
+                chunks = [];
+            }
+
+            cancelAnimationFrame(visAF);
+            clearCanvas(canvas);
+
+            $('#devices').disabled = false;
+            $('#record').disabled = false;
+            $('#stop').disabled = true;
+        }
+
+        const createRecordingPlayer = (url) => {
+            const title = document.createElement('h4');
+            title.innerHTML = (new Date());
+            const audioEl = document.createElement('audio');
+            audioEl.src = url;
+            audioEl.setAttribute('controls','');
+
+            const deleteBtn = document.createElement('button');
+            deleteBtn.innerHTML = '🗑️';
+            deleteBtn.title = 'Delete this recording';
+            deleteBtn.addEventListener('click', (e) => {
+                deleteBtn.parentNode.remove();
+            });
+
+            const liEl = document.createElement('li');
+
+            liEl.appendChild(title);
+            liEl.appendChild(audioEl);
+            liEl.appendChild(deleteBtn);
+
+            $('#recordings').appendChild(liEl);
+        }
+
+        const draw = (data) => {
+            data = [...data];
+
+            clearCanvas(canvas);
+
+            let space = canvas.width / data.length;
+
+            data.forEach((value, i) => {
+                ctx.beginPath();
+                ctx.moveTo(space * i, canvas.height);
+                ctx.lineWidth = 2;
+                ctx.strokeStyle = 'red';
+                ctx.lineTo(space * i, canvas.height - value);
+                ctx.stroke();
+            });
+        }
+
+        $('#devices').addEventListener('change', (e) => {
+            changeInput($('#devices').value);
+        });
+        $('#record').addEventListener('click', (e) => {
+            record();
+        });
+        $('#stop').addEventListener('click', (e) => {
+            stop();
+        });
+
+        // kick it all off
+        connect();
+    </script>
+</body>
+</html>
