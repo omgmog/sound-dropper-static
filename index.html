@@ -120,6 +120,10 @@
             right: 0;
             border-radius: 100%;
         }
+        p.help {
+            max-width: 40em;
+            margin: auto;
+        }
     </style>
 </head>
 <body>
@@ -134,6 +138,9 @@
             <button id="stop" disabled>Stop</button>
         </div>
         <ul id="recordings"></ul>
+        <p class="help">
+            There is a good chance this won't work in your browser! This uses the <a href="https://developer.mozilla.org/en-US/docs/Web/API/AudioContext" target="_blank" rel="nofollow">AudioContext API</a> unprefixed and the <a href="https://developer.mozilla.org/en-US/docs/Web/API/MediaRecorder" target="_blank" rel="nofollow">MediaRecorder API</a>. You're probably best off using a recent Chrome or Chromium-based browser. Anyway... have fun! 💖 <a href="https://omgmog.net">Max</a>
+        </p>
     </main>
 
     <script>
