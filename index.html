@@ -331,13 +331,14 @@
             clearCanvas(canvas);
 
             let space = canvas.width / data.length;
+            let scale = canvas.height / 255
 
             data.forEach((value, i) => {
                 ctx.beginPath();
                 ctx.moveTo(space * i, canvas.height);
                 ctx.lineWidth = space;
                 ctx.strokeStyle = 'red';
-                ctx.lineTo(space * i, canvas.height - value);
+                ctx.lineTo(space * i, canvas.height - (value * scale));
                 ctx.stroke();
             });
         }
