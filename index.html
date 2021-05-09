@@ -14,6 +14,7 @@
             --fg-button: #fff;
 
             --bg-waveform: rgba(15, 16, 49, 0.027);
+            --fg-waveform: red;
         }
 
         @media (prefers-color-scheme: dark) {
@@ -24,6 +25,7 @@
                 --fg-button: #0f1031;
 
                 --bg-waveform: rgba(193, 194, 212, 0.27);
+                --fg-waveform: red;
             }
         }
         * { box-sizing: border-box;}
@@ -171,6 +173,7 @@
         
         let canvas = $('#waveform');
         let ctx = canvas.getContext('2d');
+        let computedStyle = getComputedStyle(canvas)
 
         let constraints = {audio: { deviceId: 'default'}};
         let devices;
@@ -337,7 +340,7 @@
                 ctx.beginPath();
                 ctx.moveTo(space * i, canvas.height);
                 ctx.lineWidth = space;
-                ctx.strokeStyle = 'red';
+                ctx.strokeStyle = computedStyle.getPropertyValue('--fg-waveform');
                 ctx.lineTo(space * i, canvas.height - (value * scale));
                 ctx.stroke();
             });
