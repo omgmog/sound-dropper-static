@@ -336,14 +336,16 @@
             let space = canvas.width / data.length;
             let scale = canvas.height / 255
 
+            ctx.beginPath();
+
             data.forEach((value, i) => {
-                ctx.beginPath();
                 ctx.moveTo(space * i, canvas.height);
-                ctx.lineWidth = space;
-                ctx.strokeStyle = computedStyle.getPropertyValue('--fg-waveform');
-                ctx.lineTo(space * i, canvas.height - (value * scale));
-                ctx.stroke();
+                ctx.lineTo(space * i, canvas.height - (value * scale));    
             });
+
+            ctx.lineWidth = space;
+            ctx.strokeStyle = computedStyle.getPropertyValue('--fg-waveform');
+            ctx.stroke();
         }
 
         $('#devices').addEventListener('change', (e) => {
