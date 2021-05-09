@@ -338,14 +338,16 @@
 
             ctx.beginPath();
 
+            ctx.moveTo(0, canvas.height)
+
             data.forEach((value, i) => {
-                ctx.moveTo(space * i, canvas.height);
                 ctx.lineTo(space * i, canvas.height - (value * scale));    
             });
 
-            ctx.lineWidth = space;
-            ctx.strokeStyle = computedStyle.getPropertyValue('--fg-waveform');
-            ctx.stroke();
+            ctx.lineTo(canvas.height, canvas.width)
+
+            ctx.fillStyle = computedStyle.getPropertyValue('--fg-waveform');
+            ctx.fill();
         }
 
         $('#devices').addEventListener('change', (e) => {
