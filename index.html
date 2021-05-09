@@ -329,22 +329,22 @@
         }
 
         const draw = (data) => {
-            data = [...data];
-
             clearCanvas(canvas);
 
-            let space = canvas.width / data.length;
-            let scale = canvas.height / 255
+            const {width, height} = canvas;
+
+            let space = width / data.length;
+            let scale = height / 255
 
             ctx.beginPath();
 
-            ctx.moveTo(0, canvas.height)
+            ctx.moveTo(0, height)
 
             data.forEach((value, i) => {
-                ctx.lineTo(space * i, canvas.height - (value * scale));    
+                ctx.lineTo(space * i, height - (value * scale));
             });
 
-            ctx.lineTo(canvas.height, canvas.width)
+            ctx.lineTo(height, width)
 
             ctx.fillStyle = computedStyle.getPropertyValue('--fg-waveform');
             ctx.fill();
