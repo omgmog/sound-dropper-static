@@ -335,7 +335,7 @@
             data.forEach((value, i) => {
                 ctx.beginPath();
                 ctx.moveTo(space * i, canvas.height);
-                ctx.lineWidth = 2;
+                ctx.lineWidth = space;
                 ctx.strokeStyle = 'red';
                 ctx.lineTo(space * i, canvas.height - value);
                 ctx.stroke();
