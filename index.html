@@ -50,7 +50,7 @@
             margin: 0 auto auto;
             display: flex;
             flex-direction: column;
-            width: 100%;
+            width: 44.5rem;
             max-width: 100%;
             position: relative;
         }
@@ -288,7 +288,8 @@
         const createRecordingPlayer = (blob) => {
             const url = window.URL.createObjectURL(blob);
             const title = document.createElement('h4');
-            title.innerHTML = `${new Date()} (${blob.size} bytes)`;
+            const now = new Date();
+            title.innerHTML = `${now} (${blob.size} bytes)`;
 
             const divEl = document.createElement('div');
 
